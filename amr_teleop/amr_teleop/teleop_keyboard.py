@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 
 import rclpy
 from rclpy.node import Node
@@ -7,6 +7,16 @@ import sys
 import select
 import termios
 import tty
+
+# ANSI color codes for terminal output
+class Color:
+    RED = '\033[31m'
+    GREEN = '\033[32m'
+    YELLOW = '\033[33m'
+    BLUE = '\033[34m'
+    MAGENTA = '\033[35m'
+    CYAN = '\033[36m'
+    RESET = '\033[0m'
 
 # Key mappings
 key_mapping = {
@@ -26,7 +36,7 @@ class AMRTeleopKeyboardNode(Node):
         self.speed = 0.25
         self.angular_speed = 0.25
         self.max_speed = 1.0
-        self.get_logger().info(self.__get_interface_message())
+        self.get_logger().info(self.__get_colored_message(self.__get_interface_message(), Color.GREEN))
 
     def run(self):
         try:
@@ -35,12 +45,12 @@ class AMRTeleopKeyboardNode(Node):
                 if key in key_mapping.keys():
                     self.__send_velocity(key)
                 elif KeyboardInterrupt:
-                    self.get_logger().info('Keyboard Interrupt! Shutting down gracefully...')
+                    self.get_logger().info(self.__get_colored_message('Keyboard Interrupt! Shutting down gracefully...', Color.RED))
                     break
                 else:
-                    self.get_logger().info("Invalid key pressed! Use 'W', 'A', 'S', 'D' to control the robot.")
+                    self.get_logger().info(self.__get_colored_message("Invalid key pressed! Use 'W', 'A', 'S', 'D' to control the robot.", Color.YELLOW))
         except Exception as e:
-            self.get_logger().error(f"An error occurred: {e}")
+            self.get_logger().error(self.__get_colored_message(f"An error occurred: {e}", Color.RED))
         finally:
             self.stop_robot()
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.settings)
@@ -72,7 +82,7 @@ class AMRTeleopKeyboardNode(Node):
             twist.linear.x = self.speed
             twist.angular.z = self.angular_speed
 
-        self.get_logger().info(f'Current linear speed: {twist.linear.x}, angular speed: {twist.angular.z}')
+        self.get_logger().info(self.__get_colored_message(f'Current linear speed: {twist.linear.x}, angular speed: {twist.angular.z}', Color.CYAN))
         self.pub.publish(twist)
 
     def stop_robot(self):
@@ -95,6 +105,9 @@ s : force stop
 
 CTRL-C to quit
 """
+
+    def __get_colored_message(self, message, color):
+        return f"{color}{message}{Color.RESET}"
 
 def main(args=None):
     rclpy.init(args=args)

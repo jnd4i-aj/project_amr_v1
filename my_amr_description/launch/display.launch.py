@@ -52,17 +52,17 @@ def generate_launch_description():
     #     executable='joint_state_publisher_gui'
     #     )
 
-    rviz = Node(
-        package='rviz2',
-        executable='rviz2',
-        name='rviz2',
-        arguments=['-d', rviz_config_file],
-        output='screen'
-    )
+    # rviz = Node(
+    #     package='rviz2',
+    #     executable='rviz2',
+    #     name='rviz2',
+    #     arguments=['-d', rviz_config_file],
+    #     output='screen'
+    # )
 
     ld.add_action(use_sim_time_arg)
     ld.add_action(robot_state_publisher_node)
     # ld.add_action(joint_state_pub)
-    ld.add_action(rviz)
+    # ld.add_action(rviz)
 
     return ld
